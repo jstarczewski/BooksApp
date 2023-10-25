@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.composeJetbrains)
 }
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
@@ -29,6 +30,11 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 //put your multiplatform dependencies here
+                implementation(compose.ui)
+                implementation(compose.foundation)
+                implementation(compose.material)
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.components.resources)
             }
         }
         val commonTest by getting {
