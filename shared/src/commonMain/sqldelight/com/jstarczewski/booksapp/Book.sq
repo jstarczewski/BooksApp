@@ -1,0 +1,61 @@
+CREATE TABLE IF NOT EXISTS book (
+    full_sort_key TEXT PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    author TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sync (
+    table_key TEXT PRIMARY KEY NOT NULL,
+    timestamp TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS author (
+   name TEXT PRIMARY KEY NOT NULL,
+   slug TEXT NOT NULL
+);
+
+insertAuthor:
+INSERT OR REPLACE INTO author(name, slug) VALUES (?,?);
+
+selectAllSyncs:
+SELECT * FROM sync;
+
+selectAuthorsWithMostBooks:
+SELECT author.name, COUNT(full_sort_key) FROM author, book
+WHERE author.name GLOB book.author
+GROUP BY author.name
+ORDER BY COUNT(full_sort_key) DESC;
+
+insertIntoSync:
+INSERT OR REPLACE INTO sync(table_key, timestamp) VALUES (?,?);
+
+selectLastestSync:
+SELECT * FROM sync WHERE table_key=?;
+
+selectAll:
+SELECT * FROM book;
+
+insert:
+INSERT OR REPLACE INTO book(full_sort_key, title, author) VALUES (?,?,?);
+
+insertFullBookObject:
+INSERT OR REPLACE INTO book(full_sort_key, title, author) VALUES ?;
+
+-- {
+--         "kind": "Epika",
+--         "full_sort_key": "verne jules gabriel$20 000 mil podmorskiej z~1eglugi$2848",
+--         "title": "20 000 mil podmorskiej żeglugi",
+--         "url": "https://wolnelektury.pl/katalog/lektura/20-000-mil-podmorskiej-zeglugi/",
+--         "cover_color": "#961060",
+--         "author": "Jules Gabriel Verne",
+--         "cover": "book/cover/20-000-mil-podmorskiej-zeglugi.jpg",
+--         "epoch": "Pozytywizm",
+--         "href": "https://wolnelektury.pl/api/books/20-000-mil-podmorskiej-zeglugi/",
+--         "has_audio": true,
+--         "genre": "powieść przygodowa",
+--         "simple_thumb": "https://wolnelektury.pl/media/book/cover_api_thumb/20-000-mil-podmorskiej-zeglugi_4tC1gOu.jpg",
+--         "slug": "20-000-mil-podmorskiej-zeglugi",
+--         "cover_thumb": "book/cover_thumb/20-000-mil-podmorskiej-zeglugi_sEV8Xbp.jpg",
+--         "liked": null
+--     },
+
