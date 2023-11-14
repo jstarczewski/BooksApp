@@ -15,7 +15,8 @@ import io.kamel.image.asyncPainterResource
 fun Book(
     title: String,
     imageUrl: String,
-    author: String
+    author: String,
+    epoch: String
 ) {
     Column(
         modifier = Modifier
@@ -30,5 +31,6 @@ fun Book(
         )
         Text(title)
         Text(author)
+        Text(epoch)
     }
 }

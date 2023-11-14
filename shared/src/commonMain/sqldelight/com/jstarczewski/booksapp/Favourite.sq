@@ -1,0 +1,6 @@
+CREATE TABLE Favourite (
+    FullSortKey TEXT NOT NULL,
+    UserId INTEGER NOT NULL,
+    FOREIGN KEY (FullSortKey) REFERENCES book (full_sort_key),
+    FOREIGN KEY (UserId) REFERENCES User (Id)
+);

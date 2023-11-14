@@ -11,7 +11,8 @@ fun BookPreview() {
         Book(
             "20 000 mil podmorskiej żeglugi",
             "https://wolnelektury.pl/media/book/cover_api_thumb/20-000-mil-podmorskiej-zeglugi_4tC1gOu.jpg",
-            "Jules Gabriel Verne"
+            "Jules Gabriel Verne",
+            "Pozytywizm"
         )
     }
 }

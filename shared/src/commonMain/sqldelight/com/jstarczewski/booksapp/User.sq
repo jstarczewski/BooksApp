@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS User (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name TEXT NOT NULL,
+    SecondName TEXT NOT NULL,
+    RoleId INTEGER,
+    FOREIGN KEY (RoleId) REFERENCES Role (Id)
+);
+
+INSERT OR ABORT INTO User (Name, SecondName, RoleId) VALUES ("Jan", "Starczews", 3);

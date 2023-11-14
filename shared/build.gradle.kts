@@ -17,7 +17,7 @@ kotlin {
             }
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -32,7 +32,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 //put your multiplatform dependencies here
-                implementation(libs.molecule.runtime)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.logging)
@@ -44,6 +43,10 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kamel)
                 implementation(compose.ui)
+                implementation(compose.animation)
+                implementation(libs.precompose)
+                api(libs.molecule.runtime)
+                api(libs.precompose.molecule)
                 implementation(compose.foundation)
                 implementation(compose.material3)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)

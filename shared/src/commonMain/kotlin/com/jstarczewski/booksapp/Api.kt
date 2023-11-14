@@ -55,7 +55,8 @@ data class BookApiModel(
     val author: String,
     val title: String,
     val full_sort_key: String,
-    val simple_thumb: String
+    val simple_thumb: String,
+    val epoch: String
 )
 
 @Serializable

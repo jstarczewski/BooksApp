@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS book (
     full_sort_key TEXT PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
-    author TEXT NOT NULL
+    author TEXT NOT NULL,
+    ThumbnailUrl TEXT,
+    Epoch TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sync (
@@ -36,10 +38,11 @@ selectAll:
 SELECT * FROM book;
 
 insert:
-INSERT OR REPLACE INTO book(full_sort_key, title, author) VALUES (?,?,?);
+INSERT OR REPLACE INTO book(full_sort_key, title, author, ThumbnailUrl, Epoch)
+VALUES (?,?,?, ?, ?);
 
 insertFullBookObject:
-INSERT OR REPLACE INTO book(full_sort_key, title, author) VALUES ?;
+INSERT OR REPLACE INTO book(full_sort_key, title, author, ThumbnailUrl, Epoch) VALUES ?;
 
 -- {
 --         "kind": "Epika",

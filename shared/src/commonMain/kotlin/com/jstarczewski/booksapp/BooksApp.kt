@@ -13,34 +13,55 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import app.cash.molecule.RecompositionMode
-import app.cash.molecule.launchMolecule
 import com.jstarczewski.booksapp.ui.Book
+import moe.tlaster.precompose.PreComposeApp
+import moe.tlaster.precompose.molecule.producePresenter
+import moe.tlaster.precompose.navigation.NavHost
+import moe.tlaster.precompose.navigation.rememberNavigator
+import moe.tlaster.precompose.navigation.transition.NavTransition
 
 @Composable
 fun BooksApp() {
-    BooksAppTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-
-            val scope = rememberCoroutineScope()
-
-            val books by scope.launchMolecule(mode = RecompositionMode.ContextClock) {
-                BooksPresenter(ApiClient().booksFlow())
-            }.collectAsState()
-
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+    PreComposeApp {
+        BooksAppTheme {
+            val navigator = rememberNavigator()
+            NavHost(
+                navigator = navigator,
+                navTransition = NavTransition(),
+                initialRoute = "/books"
             ) {
-                items(books.books) {
-                    Book(
-                        title = it.title,
-                        author = it.author,
-                        imageUrl = it.simple_thumb
-                    )
+                scene(
+                    route = "/books",
+                    navTransition = NavTransition()
+                ) {
+                    val repository = booksRepository()
+                    val books by producePresenter { BooksPresenter(repository.f) }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                    ) {
+
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                        ) {
+                            items(books.books) {
+                                Book(
+                                    title = it.name,
+                                    author = it.author,
+                                    imageUrl = it.thumbnailUrl.orEmpty(),
+                                    epoch = it.epoch.orEmpty()
+                                )
+                            }
+                        }
+                    }
+                }
+                scene(
+                    route = "/favourites",
+                    navTransition = NavTransition()
+                ) {
+
                 }
             }
         }

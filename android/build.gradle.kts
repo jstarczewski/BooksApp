@@ -36,6 +36,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/versions/9/previous-compilation-data.bin"
+        }
+    }
 }
 
 dependencies {

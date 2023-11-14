@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
@@ -22,7 +23,9 @@ import kotlin.time.Duration.Companion.minutes
 
 data class DomainBook(
     val name: String,
-    val author: String
+    val author: String,
+    val thumbnailUrl: String?,
+    val epoch: String?
 )
 
 interface Synchronizer {
@@ -41,13 +44,14 @@ class BooksSynchronizer(
         interval: Duration
     ) = launch {
         while (isActive) {
-            println("Syncing now ${Clock.System.now()}")
             withContext(Dispatchers.Default) {
                 apiClient.getBooks().forEach {
                     db.bookQueries.insert(
                         full_sort_key = it.full_sort_key,
                         author = it.author,
-                        title = it.title
+                        title = it.title,
+                        ThumbnailUrl = it.simple_thumb,
+                        Epoch = it.epoch
                     )
                 }
             }
@@ -68,7 +72,9 @@ class BooksRepository(
                 it.map {
                     DomainBook(
                         name = it.title,
-                        author = it.author
+                        author = it.author,
+                        thumbnailUrl = it.ThumbnailUrl,
+                        epoch = it.Epoch
                     )
                 }
             }
@@ -80,7 +86,9 @@ class BooksRepository(
                 books().map {
                     DomainBook(
                         name = it.title,
-                        author = it.author
+                        author = it.author,
+                        thumbnailUrl = it.simple_thumb,
+                        epoch = it.epoch
                     )
                 }
             )
@@ -94,8 +102,9 @@ class BooksRepository(
                 Book(
                     full_sort_key = it.full_sort_key,
                     title = it.title,
-                    author = it.author
-                )
+                    author = it.author,
+                    ThumbnailUrl = it.simple_thumb,
+                    Epoch = it.epoch                 )
             )
         }
     }
@@ -122,8 +131,7 @@ class BooksRepository(
         }
     }
 
-    suspend fun getLatestBooks(): Flow<List<DomainBook>> {
-
+    val f: Flow<List<DomainBook>> = flow {
         val syncs = db.bookQueries.selectLastestSync(table_key = "book")
             .executeAsList()
 
@@ -131,13 +139,13 @@ class BooksRepository(
 
         when {
             syncs.isEmpty() -> {
-                println("997IGI No books, storing")
                 books().onEach {
                     db.bookQueries.insert(
                         full_sort_key = it.full_sort_key,
                         author = it.author,
-                        title = it.title
-                    )
+                        title = it.title,
+                        ThumbnailUrl = it.simple_thumb,
+                        Epoch = it.epoch                     )
                 }
 
                 db.bookQueries.insertIntoSync(
@@ -145,16 +153,20 @@ class BooksRepository(
                     timestamp = Clock.System.now().toEpochMilliseconds().toString()
                 )
 
-                return db.bookQueries.selectAll()
+                db.bookQueries.selectAll()
                     .asFlow()
                     .mapToList(Dispatchers.Default)
                     .map {
                         it.map {
                             DomainBook(
                                 name = it.title,
-                                author = it.author
+                                author = it.author,
+                                thumbnailUrl = it.ThumbnailUrl,
+                                epoch = it.Epoch
                             )
                         }
+                    }.collect {
+                        emit(it)
                     }
             }
 
@@ -169,13 +181,15 @@ class BooksRepository(
 
                 val instant = Instant.fromEpochMilliseconds(stamp.timestamp.toLong())
 
-                return if (Clock.System.now().minus(1.minutes) > instant) {
+                if (Clock.System.now().minus(1.minutes) > instant) {
                     println("997IGI Getting from API")
                     books().onEach {
                         db.bookQueries.insert(
                             full_sort_key = it.full_sort_key,
                             author = it.author,
-                            title = it.title
+                            title = it.title,
+                            ThumbnailUrl = it.simple_thumb,
+                            Epoch = it.epoch
                         )
                     }
 
@@ -184,17 +198,19 @@ class BooksRepository(
                         timestamp = Clock.System.now().toEpochMilliseconds().toString()
                     )
 
-                    return db.bookQueries.selectAll()
+                    db.bookQueries.selectAll()
                         .asFlow()
                         .mapToList(Dispatchers.Default)
                         .map {
                             it.map {
                                 DomainBook(
                                     name = it.title,
-                                    author = it.author
+                                    author = it.author,
+                                    thumbnailUrl = it.ThumbnailUrl,
+                                    epoch = it.Epoch
                                 )
                             }
-                        }
+                        }.collect { emit(it) }
                 } else {
                     println("997IGI Getting from DB")
                     db.bookQueries.selectAll()
@@ -204,12 +220,15 @@ class BooksRepository(
                             it.map {
                                 DomainBook(
                                     name = it.title,
-                                    author = it.author
+                                    author = it.author,
+                                    thumbnailUrl = it.ThumbnailUrl,
+                                    epoch = it.Epoch
                                 )
                             }
+                        }.collect {
+                            emit(it)
                         }
                 }
-
             }
         }
     }
