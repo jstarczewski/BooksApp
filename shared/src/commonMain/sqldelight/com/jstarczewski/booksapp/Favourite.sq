@@ -4,3 +4,12 @@ CREATE TABLE Favourite (
     FOREIGN KEY (FullSortKey) REFERENCES book (full_sort_key),
     FOREIGN KEY (UserId) REFERENCES User (Id)
 );
+
+selectAllFavourites:
+SELECT * FROM Favourite WHERE UserId=?;
+
+addFavourite:
+INSERT INTO Favourite(FullSortKey, UserId) VALUES (?,?);
+
+removeFavourite:
+DELETE FROM Favourite WHERE FullSortKey=? AND UserId=?;

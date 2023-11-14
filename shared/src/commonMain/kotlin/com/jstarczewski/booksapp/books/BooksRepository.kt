@@ -1,16 +1,20 @@
-package com.jstarczewski.booksapp
+package com.jstarczewski.booksapp.books
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import com.jstarczewski.booksapp.ApiClient
+import com.jstarczewski.booksapp.Book
+import com.jstarczewski.booksapp.SelectAuthorsWithMostBooks
+import com.jstarczewski.booksapp.WolneLekturyDatabse
+import com.jstarczewski.booksapp.authors
+import com.jstarczewski.booksapp.books
+import com.jstarczewski.booksapp.getBooks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
@@ -22,6 +26,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 data class DomainBook(
+    val key: String,
     val name: String,
     val author: String,
     val thumbnailUrl: String?,
@@ -71,6 +76,7 @@ class BooksRepository(
             .map {
                 it.map {
                     DomainBook(
+                        key = it.full_sort_key,
                         name = it.title,
                         author = it.author,
                         thumbnailUrl = it.ThumbnailUrl,
@@ -85,6 +91,7 @@ class BooksRepository(
             emit(
                 books().map {
                     DomainBook(
+                        key = it.full_sort_key,
                         name = it.title,
                         author = it.author,
                         thumbnailUrl = it.simple_thumb,
@@ -95,6 +102,21 @@ class BooksRepository(
         }.flowOn(Dispatchers.Default)
     }
 
+    fun selectFrom(
+        keys: List<String>
+    ) = db.bookQueries.selectFrom(keys).asFlow().mapToList(Dispatchers.Default)
+        .map {
+            it.map {
+                DomainBook(
+                    key = it.full_sort_key,
+                    name = it.title,
+                    author = it.author,
+                    thumbnailUrl = it.ThumbnailUrl,
+                    epoch = it.Epoch
+                )
+            }
+        }
+
     suspend fun download() {
         val b = books()
         b.forEach {
@@ -104,7 +126,8 @@ class BooksRepository(
                     title = it.title,
                     author = it.author,
                     ThumbnailUrl = it.simple_thumb,
-                    Epoch = it.epoch                 )
+                    Epoch = it.epoch
+                )
             )
         }
     }
@@ -145,7 +168,8 @@ class BooksRepository(
                         author = it.author,
                         title = it.title,
                         ThumbnailUrl = it.simple_thumb,
-                        Epoch = it.epoch                     )
+                        Epoch = it.epoch
+                    )
                 }
 
                 db.bookQueries.insertIntoSync(
@@ -159,6 +183,7 @@ class BooksRepository(
                     .map {
                         it.map {
                             DomainBook(
+                                key = it.full_sort_key,
                                 name = it.title,
                                 author = it.author,
                                 thumbnailUrl = it.ThumbnailUrl,
@@ -181,7 +206,7 @@ class BooksRepository(
 
                 val instant = Instant.fromEpochMilliseconds(stamp.timestamp.toLong())
 
-                if (Clock.System.now().minus(1.minutes) > instant) {
+                if (Clock.System.now().minus(20.minutes) > instant) {
                     println("997IGI Getting from API")
                     books().onEach {
                         db.bookQueries.insert(
@@ -204,6 +229,7 @@ class BooksRepository(
                         .map {
                             it.map {
                                 DomainBook(
+                                    key = it.full_sort_key,
                                     name = it.title,
                                     author = it.author,
                                     thumbnailUrl = it.ThumbnailUrl,
@@ -219,6 +245,7 @@ class BooksRepository(
                         .map {
                             it.map {
                                 DomainBook(
+                                    key = it.full_sort_key,
                                     name = it.title,
                                     author = it.author,
                                     thumbnailUrl = it.ThumbnailUrl,

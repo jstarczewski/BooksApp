@@ -1,4 +1,4 @@
-package com.jstarczewski.booksapp.ui
+package com.jstarczewski.booksapp.shared.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
@@ -13,13 +13,14 @@ import io.kamel.image.asyncPainterResource
 
 @Composable
 fun Book(
+    modifier: Modifier = Modifier,
     title: String,
     imageUrl: String,
     author: String,
     epoch: String
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .width(200.dp)
             .padding(10.dp)
     ) {
