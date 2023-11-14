@@ -8,7 +8,6 @@ plugins {
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    targetHierarchy.default()
 
     androidTarget {
         compilations.all {
@@ -46,7 +45,7 @@ kotlin {
                 implementation(compose.animation)
                 implementation(libs.precompose)
                 api(libs.molecule.runtime)
-                api(libs.precompose.molecule)
+                implementation(libs.precompose.molecule)
                 implementation(compose.foundation)
                 implementation(compose.material3)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
@@ -69,7 +68,7 @@ kotlin {
                 implementation(libs.compose.ui.tooling)
             }
         }
-        val iosMain by getting {
+        val iosMain by creating {
             dependencies {
                 implementation(libs.ktor.client.darwin)
                 implementation(libs.native.driver)

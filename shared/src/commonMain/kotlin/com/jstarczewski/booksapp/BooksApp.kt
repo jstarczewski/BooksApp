@@ -42,7 +42,10 @@ fun BooksApp() {
                 )
                 favouritesScene(
                     favouritesRepository = favouritesRepository,
-                    booksRepository = booksRepository
+                    booksRepository = booksRepository,
+                    moveBack = {
+                        navigator.goBack()
+                    }
                 )
             }
         }

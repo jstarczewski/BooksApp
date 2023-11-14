@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +26,8 @@ const val FAVOURITES_ROUTE = "/favourites"
 
 fun RouteBuilder.favouritesScene(
     favouritesRepository: FavouritesRepository,
-    booksRepository: BooksRepository
+    booksRepository: BooksRepository,
+    moveBack: () -> Unit
 ) {
     scene(
         route = FAVOURITES_ROUTE,
@@ -37,7 +40,7 @@ fun RouteBuilder.favouritesScene(
                 it
             )
         }
-        FavouritesScene(state.favourites) {
+        FavouritesScene(state.favourites, onBack = moveBack) {
             action.trySend(FavouritesAction.Remove(it))
         }
     }
@@ -46,6 +49,7 @@ fun RouteBuilder.favouritesScene(
 @Composable
 private fun FavouritesScene(
     books: List<DomainBook>,
+    onBack: () -> Unit,
     onClick: (key: String) -> Unit
 ) {
     Column(
@@ -63,6 +67,9 @@ private fun FavouritesScene(
                     epoch = it.epoch.orEmpty()
                 )
             }
+        }
+        Button(onBack) {
+            Text("Move Back")
         }
     }
 }
