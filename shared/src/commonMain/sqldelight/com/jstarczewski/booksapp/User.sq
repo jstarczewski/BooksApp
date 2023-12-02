@@ -3,7 +3,20 @@ CREATE TABLE IF NOT EXISTS User (
     Name TEXT NOT NULL,
     SecondName TEXT NOT NULL,
     RoleId INTEGER,
+    Current INTEGER,
     FOREIGN KEY (RoleId) REFERENCES Role (Id)
 );
 
-INSERT OR ABORT INTO User (Name, SecondName, RoleId) VALUES ("Jan", "Starczews", 3);
+INSERT OR REPLACE INTO User (Name, SecondName, RoleId) VALUES ("Jan", "Starczewsi", 3);
+
+getUsers:
+SELECT * FROM User;
+
+getSelectedUser:
+SELECT * FROM User WHERE Current=1;
+
+addNewUser:
+INSERT INTO User(Name, SecondName, RoleId, Current) VALUES (?,?,?, 0);
+
+setSelectedUser:
+UPDATE User SET Current=IIF(Id=?, 1, 0);

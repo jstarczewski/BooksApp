@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.jstarczewski.booksapp.ApiClient
 import com.jstarczewski.booksapp.Book
+import com.jstarczewski.booksapp.BookApiModel
 import com.jstarczewski.booksapp.SelectAuthorsWithMostBooks
 import com.jstarczewski.booksapp.WolneLekturyDatabse
 import com.jstarczewski.booksapp.authors
@@ -11,6 +12,7 @@ import com.jstarczewski.booksapp.books
 import com.jstarczewski.booksapp.getBooks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -33,11 +35,47 @@ data class DomainBook(
     val epoch: String?
 )
 
+fun Book.asDomainBook(): DomainBook = let {
+    DomainBook(
+        key = it.full_sort_key,
+        name = it.title,
+        author = it.author,
+        thumbnailUrl = it.ThumbnailUrl,
+        epoch = it.Epoch
+    )
+}
+
+fun BookApiModel.asDomainBook(): DomainBook = let {
+    DomainBook(
+        key = it.full_sort_key,
+        name = it.title,
+        author = it.author,
+        thumbnailUrl = it.simple_thumb,
+        epoch = it.epoch
+    )
+}
+
+fun BookApiModel.asBook() = let {
+    Book(
+        full_sort_key = it.full_sort_key,
+        title = it.title,
+        author = it.author,
+        ThumbnailUrl = it.simple_thumb,
+        Epoch = it.epoch
+    )
+}
+
 interface Synchronizer {
 
     fun CoroutineScope.sync(
         interval: Duration
     ): Job
+
+    suspend fun syncNow()
+
+    suspend fun syncIfOlderThan(
+        duration: Duration = 20.minutes
+    )
 }
 
 class BooksSynchronizer(
@@ -63,6 +101,66 @@ class BooksSynchronizer(
             delay(interval)
         }
     }
+
+    override suspend fun syncNow() {
+        withContext(Dispatchers.Default) {
+            apiClient.getBooks().forEach {
+                db.bookQueries.insert(
+                    full_sort_key = it.full_sort_key,
+                    author = it.author,
+                    title = it.title,
+                    ThumbnailUrl = it.simple_thumb,
+                    Epoch = it.epoch
+                )
+            }
+        }
+    }
+
+    override suspend fun syncIfOlderThan(
+        duration: Duration
+    ) = withContext(Dispatchers.IO) {
+        val syncs = db.bookQueries.selectLastestSync(table_key = "book")
+            .executeAsList()
+
+
+        when {
+            syncs.isEmpty() -> {
+                books().onEach {
+                    db.bookQueries.insertFullBookObject(
+                        it.asBook()
+                    )
+                }
+
+                db.bookQueries.insertIntoSync(
+                    table_key = "book",
+                    timestamp = Clock.System.now().toEpochMilliseconds().toString()
+                )
+            }
+
+            syncs.size > 1 -> {
+                throw IllegalStateException()
+            }
+
+            else -> {
+                println("997IGI Getting books from DB or API")
+                val stamp = syncs.first()
+                val instant = Instant.fromEpochMilliseconds(stamp.timestamp.toLong())
+
+                if (Clock.System.now().minus(duration) > instant) {
+                    println("997IGI Getting from API")
+                    books().onEach {
+                        db.bookQueries.insertFullBookObject(
+                            it.asBook()
+                        )
+                    }
+                    db.bookQueries.insertIntoSync(
+                        table_key = "book",
+                        timestamp = Clock.System.now().toEpochMilliseconds().toString()
+                    )
+                }
+            }
+        }
+    }
 }
 
 class BooksRepository(
@@ -74,32 +172,8 @@ class BooksRepository(
             .asFlow()
             .mapToList(Dispatchers.Default)
             .map {
-                it.map {
-                    DomainBook(
-                        key = it.full_sort_key,
-                        name = it.title,
-                        author = it.author,
-                        thumbnailUrl = it.ThumbnailUrl,
-                        epoch = it.Epoch
-                    )
-                }
+                it.map { it.asDomainBook() }
             }
-    }
-
-    val booksFromApi by lazy {
-        flow {
-            emit(
-                books().map {
-                    DomainBook(
-                        key = it.full_sort_key,
-                        name = it.title,
-                        author = it.author,
-                        thumbnailUrl = it.simple_thumb,
-                        epoch = it.epoch
-                    )
-                }
-            )
-        }.flowOn(Dispatchers.Default)
     }
 
     fun selectFrom(
@@ -107,13 +181,7 @@ class BooksRepository(
     ) = db.bookQueries.selectFrom(keys).asFlow().mapToList(Dispatchers.Default)
         .map {
             it.map {
-                DomainBook(
-                    key = it.full_sort_key,
-                    name = it.title,
-                    author = it.author,
-                    thumbnailUrl = it.ThumbnailUrl,
-                    epoch = it.Epoch
-                )
+                it.asDomainBook()
             }
         }
 
@@ -121,13 +189,7 @@ class BooksRepository(
         val b = books()
         b.forEach {
             db.bookQueries.insertFullBookObject(
-                Book(
-                    full_sort_key = it.full_sort_key,
-                    title = it.title,
-                    author = it.author,
-                    ThumbnailUrl = it.simple_thumb,
-                    Epoch = it.epoch
-                )
+                it.asBook()
             )
         }
     }
@@ -151,112 +213,6 @@ class BooksRepository(
     suspend fun setAuthros() {
         authors().map {
             db.bookQueries.insertAuthor(it.name, it.slug)
-        }
-    }
-
-    val f: Flow<List<DomainBook>> = flow {
-        val syncs = db.bookQueries.selectLastestSync(table_key = "book")
-            .executeAsList()
-
-        println("997IGI Getting latest books")
-
-        when {
-            syncs.isEmpty() -> {
-                books().onEach {
-                    db.bookQueries.insert(
-                        full_sort_key = it.full_sort_key,
-                        author = it.author,
-                        title = it.title,
-                        ThumbnailUrl = it.simple_thumb,
-                        Epoch = it.epoch
-                    )
-                }
-
-                db.bookQueries.insertIntoSync(
-                    table_key = "book",
-                    timestamp = Clock.System.now().toEpochMilliseconds().toString()
-                )
-
-                db.bookQueries.selectAll()
-                    .asFlow()
-                    .mapToList(Dispatchers.Default)
-                    .map {
-                        it.map {
-                            DomainBook(
-                                key = it.full_sort_key,
-                                name = it.title,
-                                author = it.author,
-                                thumbnailUrl = it.ThumbnailUrl,
-                                epoch = it.Epoch
-                            )
-                        }
-                    }.collect {
-                        emit(it)
-                    }
-            }
-
-            syncs.size > 1 -> {
-                throw IllegalStateException()
-            }
-
-            else -> {
-
-                println("997IGI Getting books from DB or API")
-                val stamp = syncs.first()
-
-                val instant = Instant.fromEpochMilliseconds(stamp.timestamp.toLong())
-
-                if (Clock.System.now().minus(20.minutes) > instant) {
-                    println("997IGI Getting from API")
-                    books().onEach {
-                        db.bookQueries.insert(
-                            full_sort_key = it.full_sort_key,
-                            author = it.author,
-                            title = it.title,
-                            ThumbnailUrl = it.simple_thumb,
-                            Epoch = it.epoch
-                        )
-                    }
-
-                    db.bookQueries.insertIntoSync(
-                        table_key = "book",
-                        timestamp = Clock.System.now().toEpochMilliseconds().toString()
-                    )
-
-                    db.bookQueries.selectAll()
-                        .asFlow()
-                        .mapToList(Dispatchers.Default)
-                        .map {
-                            it.map {
-                                DomainBook(
-                                    key = it.full_sort_key,
-                                    name = it.title,
-                                    author = it.author,
-                                    thumbnailUrl = it.ThumbnailUrl,
-                                    epoch = it.Epoch
-                                )
-                            }
-                        }.collect { emit(it) }
-                } else {
-                    println("997IGI Getting from DB")
-                    db.bookQueries.selectAll()
-                        .asFlow()
-                        .mapToList(Dispatchers.Default)
-                        .map {
-                            it.map {
-                                DomainBook(
-                                    key = it.full_sort_key,
-                                    name = it.title,
-                                    author = it.author,
-                                    thumbnailUrl = it.ThumbnailUrl,
-                                    epoch = it.Epoch
-                                )
-                            }
-                        }.collect {
-                            emit(it)
-                        }
-                }
-            }
         }
     }
 }

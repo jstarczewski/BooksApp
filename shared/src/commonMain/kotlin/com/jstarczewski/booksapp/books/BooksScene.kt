@@ -3,6 +3,7 @@ package com.jstarczewski.booksapp.books
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -24,7 +25,8 @@ import moe.tlaster.precompose.navigation.transition.NavTransition
 fun RouteBuilder.booksScene(
     booksRepository: BooksRepository,
     favouritesRepository: FavouritesRepository,
-    moveToFavourites: () -> Unit
+    moveToUser: () -> Unit,
+    moveToFavourites: (String) -> Unit
 ) {
     scene(
         route = "/books", navTransition = NavTransition()
@@ -36,8 +38,9 @@ fun RouteBuilder.booksScene(
                 action = it
             )
         }
-        BooksScene(books, onFavourites = moveToFavourites) {
-            action.trySend(FavouritesAction.Add(it))
+        BooksScene(books, onFavourites = {}, onUser = moveToUser) {
+//            action.trySend(FavouritesAction.Add(it))
+            moveToFavourites(it)
         }
     }
 }
@@ -46,6 +49,7 @@ fun RouteBuilder.booksScene(
 fun BooksScene(
     books: BooksModel,
     onFavourites: () -> Unit,
+    onUser: () -> Unit,
     onClick: (key: String) -> Unit
 ) {
     Column(
@@ -64,8 +68,13 @@ fun BooksScene(
                 )
             }
         }
-        Button(onClick = { onFavourites() }) {
-            Text("Favourites")
+        Row {
+            Button(onClick = { onFavourites() }) {
+                Text("Favourites")
+            }
+            Button(onClick = { onUser() }) {
+                Text("User")
+            }
         }
     }
 }

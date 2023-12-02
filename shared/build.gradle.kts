@@ -6,19 +6,18 @@ plugins {
     id("app.cash.sqldelight") version "2.0.0"
 }
 
-@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
+
 
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "1.8"
+                jvmTarget = "17"
             }
         }
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {
@@ -27,10 +26,10 @@ kotlin {
         }
     }
 
+
     sourceSets {
         val commonMain by getting {
             dependencies {
-                //put your multiplatform dependencies here
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.logging)
@@ -66,22 +65,15 @@ kotlin {
                 implementation(libs.compose.material3)
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling)
+                implementation(libs.androidx.work.runtime)
+                implementation(libs.androidx.work.runtime.ktx)
+
             }
         }
-        val iosMain by creating {
-            dependencies {
-                implementation(libs.ktor.client.darwin)
-                implementation(libs.native.driver)
-            }
-        }
-        val iosX64Main by getting {
-            dependsOn(iosMain)
-        }
-        val iosArm64Main by getting {
-            dependsOn(iosMain)
-        }
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
+        val iosMain by creating
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+            implementation(libs.native.driver)
         }
     }
 }
@@ -91,6 +83,10 @@ android {
     compileSdk = 34
     defaultConfig {
         minSdk = 28
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

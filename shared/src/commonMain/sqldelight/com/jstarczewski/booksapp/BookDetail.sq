@@ -1,0 +1,21 @@
+CREATE TABLE BookDetail (
+    FullSortKey TEXT NOT NULL,
+    ShortDescription TEXT NOT NULL,
+    LongDescription TEXT NOT NULL,
+    FOREIGN KEY (FullSortKey) REFERENCES book (full_sort_key)
+);
+
+
+CREATE TRIGGER create_or_update_book_detail AFTER INSERT ON book
+BEGIN
+    INSERT INTO BookDetail (
+        FullSortKey, ShortDescription, LongDescription
+    ) VALUES (
+    new.full_sort_key,
+    "Empty Short Description",
+    "Empty Long Description"
+    );
+END;
+
+selectDetails:
+    SELECT * FROM BookDetail WHERE FullSortKey=?;

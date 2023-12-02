@@ -28,7 +28,7 @@ fun BooksPresenter(
     action: Flow<FavouritesAction>
 ): BooksModel {
 
-    val books: State<List<DomainBook>> = booksRepository.f.collectAsState(emptyList())
+    val books: State<List<DomainBook>> = booksRepository.books.collectAsState(emptyList())
 
     action.collectAction {
         when (this) {
