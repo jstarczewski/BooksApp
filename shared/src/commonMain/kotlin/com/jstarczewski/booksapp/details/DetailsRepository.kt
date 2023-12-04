@@ -7,7 +7,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.mapNotNull
+import me.tatarka.inject.annotations.Inject
 
+@Inject
 class DetailsRepository(
     private val db: WolneLekturyDatabse,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO

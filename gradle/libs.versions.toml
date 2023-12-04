@@ -7,6 +7,7 @@ compose-compiler = "1.5.10"
 compose-material3 = "1.1.2"
 androidx-activityCompose = "1.8.0"
 kamel = "0.8.2"
+kotlinInjectCompilerKsp = "0.6.3"
 kotlinxCoroutinesCore = "1.7.3"
 kotlinxDatetime = "0.4.1"
 kotlinxSerializationJson = "1.6.0"
@@ -21,6 +22,8 @@ android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = 
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
 coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "androidDriver" }
+kotlin-inject-compiler-ksp = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlinInjectCompilerKsp" }
+kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlinInjectCompilerKsp" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }

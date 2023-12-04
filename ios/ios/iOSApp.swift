@@ -1,13 +1,18 @@
 import SwiftUI
 import shared
+import BackgroundTasks
 
 @main
 struct iOSApp: App {
-	var body: some Scene {
-		WindowGroup {
-            ComposeViewControllerToSwiftUI().ignoresSafeArea(.all, edges: .bottom)
+    @Environment(\.scenePhase) private var phase
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    var body: some Scene {
+        WindowGroup {
+            ComposeViewControllerToSwiftUI()
+                .ignoresSafeArea(.all, edges: .bottom)
         }
-	}
+    }
 }
 
 struct ComposeViewControllerToSwiftUI: UIViewControllerRepresentable {
@@ -19,3 +24,6 @@ struct ComposeViewControllerToSwiftUI: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     }
 }
+
+
+

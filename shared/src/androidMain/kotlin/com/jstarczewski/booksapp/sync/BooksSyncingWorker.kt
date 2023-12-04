@@ -1,14 +1,18 @@
 package com.jstarczewski.booksapp.sync
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.jstarczewski.booksapp.ApiClient
-import com.jstarczewski.booksapp.DriverFactory
+import com.jstarczewski.booksapp.shared.api.ApiClient
+import com.jstarczewski.booksapp.shared.db.DriverFactory
+import com.jstarczewski.booksapp.R
 import com.jstarczewski.booksapp.books.BooksSynchronizer
-import com.jstarczewski.booksapp.createDatabase
+import com.jstarczewski.booksapp.shared.db.createDatabase
 import kotlin.time.Duration.Companion.minutes
 
 class BooksSyncingWorker(
@@ -18,7 +22,7 @@ class BooksSyncingWorker(
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return ForegroundInfo(
-            NOTIFICATION_ID, createNotification(appContext, CHANNEL_ID)
+            NOTIFICATION_ID, appContext.createNotification(CHANNEL_ID)
         )
     }
 
@@ -28,13 +32,33 @@ class BooksSyncingWorker(
         return Result.success()
     }
 
-    private fun createNotification(
-        context: Context,
+    private fun Context.createNotification(
         channelId: String
-    ) = Notification.Builder(context, channelId)
-        .setContentTitle("Syncing Books")
-        .setContentText("Books are being synced right now")
-        .build()
+    ): Notification {
+        val channel = NotificationChannel(
+            channelId,
+            "Channel name",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Essa"
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager? =
+            getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+
+        notificationManager?.createNotificationChannel(channel)
+
+        return NotificationCompat.Builder(
+            this,
+            channelId,
+        )
+            .setSmallIcon(
+                R.drawable.icon
+            )
+            .setContentTitle("Syncing books")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+    }
 }
 
 private const val NOTIFICATION_ID = 123

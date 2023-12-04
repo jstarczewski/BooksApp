@@ -1,9 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeJetbrains)
     kotlin("plugin.serialization") version "1.9.10"
     id("app.cash.sqldelight") version "2.0.0"
+    id("com.google.devtools.ksp")
 }
 
 kotlin {
@@ -30,6 +33,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(libs.kotlin.inject.runtime)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.logging)
@@ -96,4 +100,22 @@ sqldelight {
             packageName.set("com.jstarczewski.booksapp")
         }
     }
+}
+
+kotlin.sourceSets.getByName("commonMain") {
+    kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+
+    dependencies {
+        implementation("me.tatarka.inject:kotlin-inject-runtime:0.6.3")
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}
+
+dependencies {
+    add("kspCommonMainMetadata", "me.tatarka.inject:kotlin-inject-compiler-ksp:0.6.3")
 }

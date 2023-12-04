@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Inject
 
 data class DomainUser(
     val id: Long,
@@ -24,6 +25,7 @@ fun User.asDomainUser() =
         roleId = RoleId?.toInt()
     )
 
+@Inject
 class UserRepository(
     private val wolneLekturyDatabse: WolneLekturyDatabse,
     dispatcher: CoroutineDispatcher = Dispatchers.Default

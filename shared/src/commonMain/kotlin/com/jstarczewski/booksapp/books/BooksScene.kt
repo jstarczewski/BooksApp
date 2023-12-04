@@ -75,6 +75,7 @@ fun BooksScene(
             Button(onClick = { onUser() }) {
                 Text("User")
             }
+            Text("Books ${books.books.size}")
         }
     }
 }

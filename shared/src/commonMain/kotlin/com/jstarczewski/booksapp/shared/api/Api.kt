@@ -1,4 +1,4 @@
-package com.jstarczewski.booksapp
+package com.jstarczewski.booksapp.shared.api
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import me.tatarka.inject.annotations.Inject
 
 val client by lazy {
     HttpClient {
@@ -79,6 +80,7 @@ suspend fun authors(): List<AuthorApiModel> = client.get(AuthResource()).bodyAsT
     json.decodeFromString(ListSerializer(AuthorApiModel.serializer()), it)
 }
 
+@Inject
 class ApiClient
 
 suspend fun ApiClient.getBooks() = client.get(BooksResource()).bodyAsText().let {
