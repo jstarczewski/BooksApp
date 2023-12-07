@@ -16,9 +16,9 @@ class ContinuingInBackgroundBooksDataSynchronizer(
     private val booksService: BooksService
 ) : DataSynchronizer {
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val _isSyncing = MutableStateFlow(true)
+    private val _isSyncing = MutableStateFlow(false)
 
     override val isSyncing: Flow<Boolean> = _isSyncing
 

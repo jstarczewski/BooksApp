@@ -1,6 +1,8 @@
 package com.jstarczewski.booksapp.shared.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -19,19 +21,21 @@ fun Book(
     author: String,
     epoch: String
 ) {
-    Column(
+    Row(
         modifier = modifier
-            .width(200.dp)
+            .fillMaxWidth()
+            .height(150.dp)
             .padding(10.dp)
     ) {
         KamelImage(
-            modifier = Modifier
-                .height(300.dp),
+            modifier = Modifier.weight(1f),
             resource = asyncPainterResource(imageUrl),
             contentDescription = null
         )
-        Text(title)
-        Text(author)
-        Text(epoch)
+        Column(modifier = Modifier.weight(3f)) {
+            Text(title)
+            Text(author)
+            Text(epoch)
+        }
     }
 }

@@ -1,17 +1,15 @@
 package com.jstarczewski.booksapp.shared.synchronizer
 
-import androidx.compose.runtime.Composable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import me.tatarka.inject.annotations.Inject
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 interface DataSynchronizer {
 
@@ -47,9 +45,9 @@ class BooksDataSynchronizer(
     syncManager: SyncManager,
     delegate: DataSynchronizer
 ) : DataSynchronizerDecorator(
-    syncManager=syncManager,
-    delegate=delegate,
-    period = 1.seconds,
+    syncManager = syncManager,
+    delegate = delegate,
+    period = 20.minutes,
     group = SyncGroup.BOOKS,
     coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 )

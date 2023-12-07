@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,27 +49,11 @@ fun RouteBuilder.booksScene(
 
 @Composable
 fun BooksScene(
-    books: BooksModel,
-    onFavourites: () -> Unit,
-    onUser: () -> Unit,
-    onClick: (key: String) -> Unit
+    books: BooksModel, onFavourites: () -> Unit, onUser: () -> Unit, onClick: (key: String) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize().background(Color.White)
     ) {
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
-        ) {
-            items(books.books) {
-                Book(
-                    modifier = Modifier.clickable { onClick(it.key) },
-                    title = it.name,
-                    author = it.author,
-                    imageUrl = it.thumbnailUrl.orEmpty(),
-                    epoch = it.epoch.orEmpty()
-                )
-            }
-        }
         Row {
             Button(onClick = { onFavourites() }) {
                 Text("Favourites")
@@ -76,6 +62,19 @@ fun BooksScene(
                 Text("User")
             }
             Text("Books ${books.books.size}")
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+        ) {
+            items(books.books, key = { it.key }) {
+                Book(
+                    modifier = Modifier.clickable { onClick(it.key) },
+                    title = it.name,
+                    author = it.author,
+                    imageUrl = it.thumbnailUrl.orEmpty(),
+                    epoch = it.epoch.orEmpty()
+                )
+            }
         }
     }
 }

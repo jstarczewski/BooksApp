@@ -11,7 +11,9 @@ val appComponent: AppComponent
 
 internal fun setupInternally(createAppComponent: () -> AppComponent) {
     _appComponent = createAppComponent()
-    _appComponent?.run { dataSynchronizer.requestSync() }
+    _appComponent?.run {
+        booksDataSynchronizer.requestSync()
+    }
     KamelConfig {
         takeFrom(KamelConfig.Default)
     }
