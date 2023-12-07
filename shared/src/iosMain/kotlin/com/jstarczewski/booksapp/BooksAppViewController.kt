@@ -12,5 +12,5 @@ fun BooksAppViewController(): UIViewController = ComposeUIViewController(
         onFocusBehavior = OnFocusBehavior.DoNothing
     }
 ) {
-    BooksApp()
+    BooksApp(appComponent = appComponent)
 }

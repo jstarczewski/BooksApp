@@ -34,7 +34,7 @@ class WorkManagerBooksDataSynchronizer(val context: Context) : DataSynchronizer 
         )
     }
 
-    fun scheduleWorkManagerSync(): OneTimeWorkRequest {
+    private fun scheduleWorkManagerSync(): OneTimeWorkRequest {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

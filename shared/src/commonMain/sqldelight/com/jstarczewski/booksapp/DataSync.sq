@@ -1,0 +1,16 @@
+CREATE TABLE DataSync (
+  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  SyncDataGroup TEXT NOT NULL,
+  LatestSyncTimestampEpoch TEXT,
+  State INTEGER DEFAULT 0
+);
+
+insertSyncStart:
+INSERT INTO DataSync (SyncDataGroup, LatestSyncTimestampEpoch) VALUES (?, datetime('now'));
+
+updateSyncStateAsSuccess:
+UPDATE DataSync SET State = 1 WHERE Id = ?;
+
+selectLatestSyncForGroup:
+SELECT Id, datetime(LatestSyncTimestampEpoch), State FROM DataSync WHERE SyncDataGroup=? ORDER BY
+    LatestSyncTimestampEpoch DESC LIMIT 1;

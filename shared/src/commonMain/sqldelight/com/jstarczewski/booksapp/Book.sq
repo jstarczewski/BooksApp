@@ -65,3 +65,5 @@ INSERT OR REPLACE INTO book(full_sort_key, title, author, ThumbnailUrl, Epoch) V
 --         "liked": null
 --     },
 
+deleteIfNotInList:
+DELETE FROM book WHERE book.full_sort_key NOT IN ?;

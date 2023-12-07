@@ -31,11 +31,5 @@ fun FavouritesPresenter(
         }
     }
 
-    val favourites by favouritesRepository
-        .favourites
-        .flatMapLatest { favorites ->
-            booksRepository.selectFrom(favorites.map { it.fullSortKey })
-        }.collectAsState(emptyList())
-
-    return FavouritesModel(favourites = favourites)
+    return FavouritesModel(favourites = emptyList())
 }

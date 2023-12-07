@@ -1,12 +1,9 @@
 package com.jstarczewski.booksapp.shared.synchronizer
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import com.jstarczewski.booksapp.shared.api.ApiClient
-import com.jstarczewski.booksapp.books.BooksSynchronizer
-import com.jstarczewski.booksapp.shared.db.database
+import com.jstarczewski.booksapp.books.BooksService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +13,10 @@ import platform.UIKit.UIBackgroundTaskIdentifier
 
 
 class ContinuingInBackgroundBooksDataSynchronizer(
-    private val synchronizer: BooksSynchronizer
+    private val booksService: BooksService
 ) : DataSynchronizer {
 
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val _isSyncing = MutableStateFlow(true)
 
@@ -29,7 +26,7 @@ class ContinuingInBackgroundBooksDataSynchronizer(
         _isSyncing.value = true
 
         val job = scope.launch {
-            synchronizer.syncIfOlderThan()
+            booksService.downloadAllBooks()
         }
 
         var idenitifier: UIBackgroundTaskIdentifier? = null

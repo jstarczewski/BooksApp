@@ -1,12 +1,17 @@
 package com.jstarczewski.booksapp
 
-import com.jstarczewski.booksapp.shared.synchronizer.DataSynchronizer
 import io.kamel.core.config.KamelConfig
 import io.kamel.core.config.takeFrom
 import io.kamel.image.config.Default
 
-internal fun setupInternally(dataSynchronizer: DataSynchronizer) {
-    dataSynchronizer.requestSync()
+private var _appComponent: AppComponent? = null
+
+val appComponent: AppComponent
+    get() = _appComponent ?: throw IllegalStateException()
+
+internal fun setupInternally(createAppComponent: () -> AppComponent) {
+    _appComponent = createAppComponent()
+    _appComponent?.run { dataSynchronizer.requestSync() }
     KamelConfig {
         takeFrom(KamelConfig.Default)
     }

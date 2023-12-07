@@ -1,5 +1,5 @@
 package com.jstarczewski.booksapp
 
 fun setup() {
-    setupInternally(AppComponent().dataSynchronizer)
+    setupInternally { AppComponent() }
 }

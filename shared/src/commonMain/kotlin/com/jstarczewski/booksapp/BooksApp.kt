@@ -27,7 +27,7 @@ import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
 
 @Composable
-fun BooksApp(appComponent: AppComponent = createAppComponent()) {
+fun BooksApp(appComponent: AppComponent) {
 
     val isSyncing by appComponent
         .dataSynchronizer

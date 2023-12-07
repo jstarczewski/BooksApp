@@ -2,9 +2,11 @@ package com.jstarczewski.booksapp
 
 import androidx.compose.runtime.Composable
 import com.jstarczewski.booksapp.books.BooksRepository
+import com.jstarczewski.booksapp.books.BooksService
 import com.jstarczewski.booksapp.details.DetailsRepository
 import com.jstarczewski.booksapp.favourites.FavouritesRepository
 import com.jstarczewski.booksapp.shared.api.ApiClient
+import com.jstarczewski.booksapp.shared.synchronizer.BooksDataSynchronizer
 import com.jstarczewski.booksapp.shared.synchronizer.DataSynchronizer
 import com.jstarczewski.booksapp.user.UserRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -31,6 +33,10 @@ abstract class AppComponent(
     val ioDispatcher: CoroutineDispatcher
         @Provides
         get() = Dispatchers.IO
+
+    abstract val booksService: BooksService
+
+    abstract val booksDataSynchronizer: BooksDataSynchronizer
 }
 
 @Composable

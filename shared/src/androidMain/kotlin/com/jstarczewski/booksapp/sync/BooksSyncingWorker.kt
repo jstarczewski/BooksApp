@@ -8,17 +8,15 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.jstarczewski.booksapp.shared.api.ApiClient
-import com.jstarczewski.booksapp.shared.db.DriverFactory
 import com.jstarczewski.booksapp.R
-import com.jstarczewski.booksapp.books.BooksSynchronizer
-import com.jstarczewski.booksapp.shared.db.createDatabase
-import kotlin.time.Duration.Companion.minutes
+import com.jstarczewski.booksapp.createAppComponent
 
 class BooksSyncingWorker(
     private val appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
+
+    private val booksService = createAppComponent(appContext).booksService
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return ForegroundInfo(
@@ -27,8 +25,7 @@ class BooksSyncingWorker(
     }
 
     override suspend fun doWork(): Result {
-        val synchronizer = createBooksSynchronizer(appContext)
-        synchronizer.syncIfOlderThan(1.minutes)
+        booksService.downloadAllBooks()
         return Result.success()
     }
 
@@ -64,10 +61,4 @@ class BooksSyncingWorker(
 private const val NOTIFICATION_ID = 123
 
 private const val CHANNEL_ID = "channel_id_123"
-
-
-private fun createBooksSynchronizer(context: Context) = BooksSynchronizer(
-    db = createDatabase(DriverFactory(context)),
-    apiClient = ApiClient()
-)
 
