@@ -63,8 +63,7 @@ private fun FavouritesScene(
                     modifier = Modifier.clickable { onClick(it.key) },
                     title = it.name,
                     author = it.author,
-                    imageUrl = it.thumbnailUrl.orEmpty(),
-                    epoch = it.epoch.orEmpty()
+                    imageUrl = it.thumbnailUrl.orEmpty()
                 )
             }
         }

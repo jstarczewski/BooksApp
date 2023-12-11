@@ -19,7 +19,7 @@ interface DataSynchronizer {
 }
 
 @Inject
-abstract class DataSynchronizerDecorator(
+abstract class DataSynchronizerProxy(
     private val syncManager: SyncManager,
     private val delegate: DataSynchronizer,
     private val period: Duration,
@@ -44,7 +44,7 @@ abstract class DataSynchronizerDecorator(
 class BooksDataSynchronizer(
     syncManager: SyncManager,
     delegate: DataSynchronizer
-) : DataSynchronizerDecorator(
+) : DataSynchronizerProxy(
     syncManager = syncManager,
     delegate = delegate,
     period = 20.minutes,
